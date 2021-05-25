@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- <arg name="path" default="$(find shimizu_bundler_mvg)/data_oct19"/> -->
+    <arg name="thermal_topic" default="/uav1/thermal/image"/>
+
+
+    <node pkg="shimizu_thermal_projection" type="thermal_preproces" name="thermal_preproces" output="screen" required="true">
+        <param name="thermal_topic"       value="$(arg thermal_topic)"/>
+        <param name="min_intensity" type="double" value="23500"/>
+        <param name="max_intensity" type="double" value="25000"/>
+    </node>
+
+</launch>

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- <arg name="path" default="$(find shimizu_bundler_mvg)/data_oct19"/> -->
+    <arg name="path" default="/data/20210501_Hawkins/rgb-IR/cementpillar2"/>
+
+    <!-- <node pkg="rosbag" type="play" name="rosbag" required="true" 
+        args="/home/huai/Documents/data/thermal/IR-RGB/2021-02-19-21-30-30.bag /home/huai/Documents/data/thermal/IR-RGB/set2_rgb_imu.bag"/> -->
+    <node pkg="extract_thermal_image" type="IR_RGB_calib" name="IR_RGB_calib" output="screen">
+        <param name="rgbDir"       value="$(arg path)/rgb/"/>
+        <param name="thermalDir"       value="$(arg path)/thermal/"/> 
+        <param name="rgb_topic"       value="/uav1/xic_stereo/left/image_raw"/> 
+        <param name="thermal_topic"       value="/thermal/image8"/> 
+    </node>
+
+</launch>
