@@ -3,18 +3,18 @@
 
     <!-- <arg name="path" default="$(find shimizu_bundler_mvg)/data_oct19"/> -->
     <arg name="path" default="/project/shimizu/data/20210501_Hawkins"/>
-    <arg name="sample_step" default="1"/>
+    <arg name="seq" default="01"/>
 
     <node pkg="shimizu_thermal_projection" type="thermal_preproces" name="thermal_preproces" output="screen" required="true">
         <param name="thermal_topic"       value="/uav1/thermal/image"/>
         <param name="min_intensity" type="double" value="22000"/>
-        <param name="max_intensity" type="double" value="23500"/>
+        <param name="max_intensity" type="double" value="26000"/>
     </node>
 
     <node pkg="extract_thermal_image" type="thermal_extraction_node" name="thermal_extraction_node" output="screen">
-        <param name="rgbimage_csv"       value="$(arg path)/SfM_results/04_tiny/stereo/left_filenames.csv"/>
-        <param name="timestamps_csv"       value="$(arg path)/extracted/04_tiny/images/color/left/StereoImages.csv"/> 
-        <param name="thermal_dir"       value="$(arg path)/extracted/04_tiny/images/thermal"/> 
+        <param name="rgbimage_csv"       value="$(arg path)/SfM_results/$(arg seq)/stereo/left_filenames.csv"/>
+        <param name="timestamps_csv"       value="$(arg path)/extracted/$(arg seq)/images/color/camera/left/StereoImages.csv"/> 
+        <param name="thermal_dir"       value="$(arg path)/extracted/$(arg seq)/images/thermal"/> 
         <param name="thermal_topic"       value="/thermal/image8"/>
     </node>
 
