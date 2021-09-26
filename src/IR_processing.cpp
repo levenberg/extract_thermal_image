@@ -15,18 +15,15 @@
 ros::Publisher pub_img;
 std::string thermal_topic;
 double max_intensity, min_intensity;
+bool auto_thresh=false;
 
 void image_callback(const sensor_msgs::ImageConstPtr &image_msg)
 {
   cv_bridge::CvImageConstPtr ptr;
   ptr = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::TYPE_16UC1);
   cv::Mat IR16 = ptr->image;
-  // auto pixel=IR16.at<ushort>(10,10); //21705  
-  // std::cout<<"IR16 type: "<<IR16.type()<<"[10,10]="<<pixel<<std::endl;
-  // cv::Mat IR8, temp;
-  // cv::threshold(IR16, IR8, max_intensity, max_intensity, cv::THRESH_TRUNC);
-  // cv::threshold(-IR8, temp, -min_intensity, -min_intensity, cv::THRESH_TRUNC);
-  // IR8=(-temp);
+  if (auto_thresh)
+    cv::minMaxIdx(IR16, &min_intensity, &max_intensity);
   cv::Mat IR8(IR16.rows, IR16.cols, 0);
   for (int i = 0; i < IR8.rows * IR8.cols; i++)
   {
@@ -45,6 +42,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n("~");
 
     n.param("thermal_topic",   thermal_topic,   std::string(""));
+    n.getParam("auto_thresh", auto_thresh);
     n.getParam("min_intensity", min_intensity);
     n.getParam("max_intensity", max_intensity);
     pub_img = n.advertise<sensor_msgs::Image>("/thermal/image8",1000);
