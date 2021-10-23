@@ -20,8 +20,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Eigen3 REQUIRED) 
 include_directories(${Eigen3_INCLUDE_DIRS})
-
-find_package(OpenCV 3)
+# set(OpenCV_DIR /home/huai/thirdparty/opencv-3.4.16/build)
+find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 find_package(PCL 1.8 REQUIRED)

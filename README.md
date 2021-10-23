@@ -8,6 +8,7 @@ This repo needs OpenCV:
 - 1.1. **IR_preprocessing** is used to convert 16 bit raw thermal image to 8 bit image;
 - 1.2 **IR_RGB_calib** is used to extract pairwise rgb-thermal image for [only] extrinsic calibration;
 - 1.3 **thermal_extraction_node** is used to extract the corresponding thermal images for shimizu RGB images;
+- 1.4 **thermal_intensity_correction** is used to equalize the intensity of thermal images across all images.
 
 
 ## 2. How to use it?

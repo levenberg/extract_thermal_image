@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="extract_thermal_image" type="match_correction.py" name="thermal_intensity_correction" output="screen">
+        <param name="image_dir"       value="/home/huai/Downloads/thermal"/>
+        <param name="output_dir"      value="/home/huai/Downloads/thermal_new"/>
+        <param name="start_gain" type="double" value="-50"/>
+    </node>
+
+</launch>

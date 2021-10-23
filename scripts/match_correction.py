@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+import rospy
 import cv2
+import os
 import time
 import random
 import numpy as np
@@ -8,16 +11,14 @@ SHOW_RESULT_IMAGE = False
 SHOW_DEBUG_IMAGE = False
 
 # source images path and output path. change it
-IMAGE_PATH = "/home/huai/Documents/data/cloud_models/japan_bridge/thermal/image/"
-OUTPUT_PATH = "/home/huai/Documents/data/cloud_models/japan_bridge/thermal/corrected/"
+# IMAGE_PATH = "/home/huai/Documents/data/cloud_models/japan_bridge/thermal/image/"
+# OUTPUT_PATH = "/home/huai/Documents/data/cloud_models/japan_bridge/thermal/corrected/"
 
 # the pitch size of average around matched points
 KERNEL_SIZE = 15
 HALF_KERNEL_SIZE = int(KERNEL_SIZE/2)
 
-# if the 1st image is too dark, enlarge this value
-# if it is too bright, put a negative value here
-START_GAIN = 40
+
 
 # image file list
 img_list = ["{:0>6d}.png".format(i) for i in range(0, 590+1, 5)]
@@ -63,7 +64,11 @@ def match(img1, img2, method="SIFT", threshold=10000):
     if method == "SURF":
         detector = cv2.xfeatures2d.SURF_create(threshold)
     else:
-        detector = cv2.xfeatures2d.SIFT_create(threshold)
+        version = cv2.__version__
+        if version.split('.')[0]=="3":
+            detector = cv2.xfeatures2d.SIFT_create(threshold)
+        elif version.split('.')[0]=="4":
+            detector = cv2.SIFT_create(threshold)
 
     kp1, descrip1 = detector.detectAndCompute(img1, None)
     kp2, descrip2 = detector.detectAndCompute(img2, None)
@@ -78,7 +83,7 @@ def match(img1, img2, method="SIFT", threshold=10000):
 
     good=[]
     for i,(m,n) in enumerate(match):
-        if(m.distance < 0.7*n.distance):
+        if(m.distance < 0.8*n.distance):
             good.append(m)
 
     print("\t# of good matches: %d" % len(good))
@@ -158,19 +163,29 @@ def calc_diff(img1, img2, src_pts, ano_pts):
 
 # usage: press p to pause, q to quit
 if __name__ == "__main__":
+
+    rospy.init_node('thermal_correction')
+    IMAGE_PATH = rospy.get_param('~image_dir')
+    OUTPUT_PATH = rospy.get_param('~output_dir')
+    if not os.path.exists(OUTPUT_PATH):
+        os.makedirs(OUTPUT_PATH)
+    # if the 1st image is too dark, enlarge this value
+    # if it is too bright, put a negative value here
+    START_GAIN = rospy.get_param('~start_gain')
+
     accumulate_diff = -START_GAIN
     diff_list = []
 
-    ref_img = cv2.imread(IMAGE_PATH + img_list[0], -1)
+    ref_img = cv2.imread(os.path.join(IMAGE_PATH, img_list[0]), -1)
     print(ref_img.dtype)
     ref_img = np.clip(ref_img.astype(int)+START_GAIN, 0, 255).astype(ref_img.dtype)
-    cv2.imwrite(OUTPUT_PATH + img_list[0], ref_img)
+    cv2.imwrite(os.path.join(OUTPUT_PATH, img_list[0]), ref_img)
 
     for i in range(1, len(img_list)):
         print("Processing image " + img_list[i])
 
-        img1 = cv2.imread(IMAGE_PATH + img_list[i-1], -1) if i==1 else img2
-        img2 = cv2.imread(IMAGE_PATH + img_list[i], -1)
+        img1 = cv2.imread(os.path.join(IMAGE_PATH, img_list[i-1]), -1) if i==1 else img2
+        img2 = cv2.imread(os.path.join(IMAGE_PATH, img_list[i]), -1)
 
         src_pts, ano_pts = match(img1, img2, "SIFT", 100)
         src_pts = np.round(src_pts).astype(int)
@@ -191,7 +206,7 @@ if __name__ == "__main__":
         # img3[mask] -= accumulate_diff
         img3 -= accumulate_diff
         img3 = np.round(np.clip(img3, 0, 255)).astype(img2.dtype)
-        cv2.imwrite(OUTPUT_PATH + img_list[i], img3)
+        cv2.imwrite(os.path.join(OUTPUT_PATH, img_list[i]), img3)
 
         if SHOW_RESULT_IMAGE:
             h, w = img1.shape[:2]
@@ -213,7 +228,7 @@ if __name__ == "__main__":
 
     print(diff_list)
 
-    f_times = open(OUTPUT_PATH + "times.txt", "w")
+    f_times = open(os.path.join(OUTPUT_PATH, "times.txt"), "w")
     for i in range(0, len(img_list)):
         f_times.write(img_list[i] + " " + str(i/2.0) + "\n")
     f_times.close()
